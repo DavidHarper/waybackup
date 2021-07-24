@@ -177,10 +177,12 @@ if __name__ == '__main__':
 
     elapsed='%.3f' % (dtFinish.timestamp()-dtStart.timestamp())
 
+    filebytes="{:,}".format(files_bytes_copied)
+
     print("WAYBACKUP RUN FINISHED")
     print("Started at " + str(dtStart) + ", finished at " + str(dtFinish) + " (" + elapsed + " seconds)")
     print("Traversed " + str(directories_traversed) + " directories")
     print("Linked " + str(links_created) + " files")
-    print("Copied " + str(files_copied) + " files (" + str(files_bytes_copied) + " bytes)")
+    print("Copied " + str(files_copied) + " files (" + filebytes + " bytes)")
     print("Copied " + str(symlinks_copied) + " symlinks")
     print("Altered " + str(file_attributes_copied) + " sets of file attributes")
