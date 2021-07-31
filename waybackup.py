@@ -8,6 +8,7 @@ debug=os.getenv('DEBUG') != None
 IGNORE_FILE_NAME='.waybackup.ignore'
 
 directories_traversed = 0
+directories_skipped=0
 files_copied = 0
 files_bytes_copied=0
 file_attributes_copied = 0
@@ -15,10 +16,17 @@ symlinks_copied = 0
 links_created = 0
 
 def traverser(srcdir, refdir, tgtdir, ignore=None):
-    global directories_traversed
+    global directories_traversed, directories_skipped
 
     if debug:
-        print('\n### ENTER traverser(' + srcdir + ', ' + refdir + ', ' + tgtdir + ')')
+        print('\n### ENTER traverser(' + srcdir + ', ' + refdir + ', ' + tgtdir
+        + ', ignore=' + str(ignore) + ')')
+
+    if (ignore is not None) and (srcdir in ignore):
+        directories_skipped = directories_skipped + 1
+        if debug:
+            print('# Skipping ' + srcdir + ' because it is in the ignore list.')
+        return
 
     if debug:
         print("#! mkdir " + tgtdir)
@@ -34,10 +42,7 @@ def traverser(srcdir, refdir, tgtdir, ignore=None):
         if os.path.islink(srcpath) or os.path.isfile(srcpath):
             process_file(srcpath, refpath, tgtpath)
         elif os.path.isdir(srcpath):
-            if ignore==None or not srcpath in ignore:
-                traverser(srcpath, refpath, tgtpath)
-            elif debug:
-                print('# Skipping ' + srcpath + ' because it is in the ignore list.')
+            traverser(srcpath, refpath, tgtpath, ignore)
         else:
             process_other_entity(srcpath, refpath, tgtpath)
 
@@ -61,8 +66,8 @@ def update_ignore_list(ignore, srcdir):
     if len(ignorelist)==0:
         return ignore
 
-    if debug:
-        print('# Adding to ignore list: ' + str(ignorelist))
+
+    print('# Adding to ignore list: ' + str(ignorelist))
 
     if ignore is None:
         return set(ignorelist)
@@ -213,6 +218,7 @@ if __name__ == '__main__':
     print("WAYBACKUP RUN FINISHED")
     print("Started at " + str(dtStart) + ", finished at " + str(dtFinish) + " (" + elapsed + " seconds)")
     print("Traversed " + str(directories_traversed) + " directories")
+    print("Skipped " + str(directories_skipped) + " directories")
     print("Linked " + str(links_created) + " files")
     print("Copied " + str(files_copied) + " files (" + filebytes + " bytes)")
     print("Copied " + str(symlinks_copied) + " symlinks")
