@@ -60,12 +60,15 @@ def update_ignore_list(ignore, srcdir):
 
     with open(ignorefile, 'r') as f:
         for line in f:
-            abspath=os.path.join(srcdir,line.strip('\n'))
-            ignorelist.append(abspath)
+            path=line.strip('\n')
+            if os.path.isabs(path):
+                print('WARNING: Ignoring absolute path in ignore file: ' + path)
+            else:
+                abspath=os.path.join(srcdir,path)
+                ignorelist.append(abspath)
 
     if len(ignorelist)==0:
         return ignore
-
 
     print('# Adding to ignore list: ' + str(ignorelist))
 
