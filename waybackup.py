@@ -70,7 +70,8 @@ def update_ignore_list(ignore, srcdir):
     if len(ignorelist)==0:
         return ignore
 
-    print('# Adding to ignore list: ' + str(ignorelist))
+    if debug:
+        print('# Adding to ignore list: ' + str(ignorelist))
 
     if ignore is None:
         return set(ignorelist)
