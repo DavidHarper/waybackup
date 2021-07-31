@@ -5,6 +5,8 @@ from datetime import datetime
 
 debug=os.getenv('DEBUG') != None
 
+IGNORE_FILE_NAME='.waybackup.ignore'
+
 directories_traversed = 0
 files_copied = 0
 files_bytes_copied=0
@@ -12,7 +14,7 @@ file_attributes_copied = 0
 symlinks_copied = 0
 links_created = 0
 
-def traverser(srcdir, refdir, tgtdir):
+def traverser(srcdir, refdir, tgtdir, ignore=None):
     global directories_traversed
 
     if debug:
@@ -23,6 +25,8 @@ def traverser(srcdir, refdir, tgtdir):
 
     os.makedirs(tgtdir)
 
+    ignore=update_ignore_list(ignore, srcdir)
+
     for file in os.listdir(srcdir):
         srcpath = os.path.join(srcdir, file)
         refpath = os.path.join(refdir, file)
@@ -30,13 +34,40 @@ def traverser(srcdir, refdir, tgtdir):
         if os.path.islink(srcpath) or os.path.isfile(srcpath):
             process_file(srcpath, refpath, tgtpath)
         elif os.path.isdir(srcpath):
-            traverser(srcpath, refpath, tgtpath)
+            if ignore==None or not srcpath in ignore:
+                traverser(srcpath, refpath, tgtpath)
+            elif debug:
+                print('# Skipping ' + srcpath + ' because it is in the ignore list.')
         else:
             process_other_entity(srcpath, refpath, tgtpath)
 
     copy_file_attributes(srcdir, tgtdir)
 
     directories_traversed = directories_traversed + 1
+
+def update_ignore_list(ignore, srcdir):
+    ignorefile=os.path.join(srcdir, IGNORE_FILE_NAME)
+
+    if not os.path.isfile(ignorefile):
+        return ignore
+
+    ignorelist=[]
+
+    with open(ignorefile, 'r') as f:
+        for line in f:
+            abspath=os.path.join(srcdir,line.strip('\n'))
+            ignorelist.append(abspath)
+
+    if len(ignorelist)==0:
+        return ignore
+
+    if debug:
+        print('# Adding to ignore list: ' + str(ignorelist))
+
+    if ignore is None:
+        return set(ignorelist)
+    else:
+        return ignore | set(ignorelist)
 
 def process_file(srcpath, refpath, tgtpath):
     global links_created
