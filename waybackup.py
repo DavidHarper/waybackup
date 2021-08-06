@@ -213,7 +213,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.srcdir is None or args.refdir is None or args.tgtdir is None:
-        print("Usage: " + sys.argv[0] + "[--verbose] [--dryrun] --srcdir source-directory --refdir reference-directory --tgtdir target-directory")
+        print("Usage: " + sys.argv[0] + " [--verbose] [--dryrun] --srcdir source-directory --refdir reference-directory --tgtdir target-directory")
         exit(1)
     else:
         srcdir = args.srcdir
