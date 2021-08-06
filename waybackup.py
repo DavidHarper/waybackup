@@ -17,6 +17,7 @@ class WayBackupEvent(Enum):
     FINISHED_BACKUP = 9
     FOUND_IGNORE_FILE = 10
     ADDED_IGNORED_DIRECTORY = 11
+    ABORTED_BACKUP = 12
 
 class WayBackup:
     IGNORE_FILE_NAME='.waybackup.ignore'
@@ -34,6 +35,9 @@ class WayBackup:
         self.file_attributes_copied=0
         self.symlinks_copied=0
         self.links_created=0
+        self.last_directory_entered=None
+        self.errno=0
+        self.strerror=None
 
         start_time=datetime.now()
 
@@ -49,7 +53,11 @@ class WayBackup:
                 }
             )
 
-        self.process_directory(srcdir, refdir, tgtdir)
+        try:
+            self.process_directory(srcdir, refdir, tgtdir)
+        except OSError as error:
+            self.errno=error.errno
+            self.strerror=error.strerror
 
         finish_time=datetime.now()
 
@@ -72,7 +80,14 @@ class WayBackup:
                 'links_created' : self.links_created
             }
 
+            if self.errno!=0:
+                results['errno']=self.errno
+                results['strerror']=self.strerror
+                results['last_directory_entered']=self.last_directory_entered
+
             self.callback(WayBackupEvent.FINISHED_BACKUP, results)
+
+        return self.errno
 
     def process_directory(self, srcdir, refdir, tgtdir, ignore=None):
         ignore=self.update_ignore_list(ignore, srcdir)
@@ -84,6 +99,8 @@ class WayBackup:
                 self.callback(WayBackupEvent.SKIPPED_DIRECTORY, {'name' : srcdir})
 
             return None
+
+        self.last_directory_entered=srcdir
 
         if self.verbose and self.callback is not None:
             self.callback(WayBackupEvent.ENTERED_DIRECTORY, {'name' : srcdir})
@@ -260,4 +277,6 @@ if __name__ == '__main__':
 
     backup=WayBackup(callback=reporter, verbose=args.verbose, dryrun=args.dryrun)
 
-    backup.backup(args.srcdir, args.refdir, args.tgtdir)
+    rc=backup.backup(args.srcdir, args.refdir, args.tgtdir)
+
+    exit(rc)
