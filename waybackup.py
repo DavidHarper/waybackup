@@ -84,6 +84,8 @@ class WayBackup:
 
         self.copy_file_attributes(srcdir, tgtdir)
 
+        self.directories_processed = self.directories_processed + 1
+
         if self.callback is not None:
             self.callback(WayBackupEvent.EXITED_DIRECTORY, {'name' : srcdir})
 
@@ -112,7 +114,7 @@ class WayBackup:
 
     def process_file(self, srcpath, refpath, tgtpath):
         if not os.path.exists(refpath) or not os.path.isfile(refpath):
-            copy_file(self, srcpath, tgtpath)
+            self.copy_file(srcpath, tgtpath)
             return
 
         srcstat = os.stat(srcpath)
@@ -167,7 +169,7 @@ class WayBackup:
             self.symlinks_copied = self.symlinks_copied + 1
 
             if self.verbose and self.callback is not None:
-                self.callback(WayBackupEvent.CREATED_SYMLINK, {'name' : srcpath})
+                self.callback(WayBackupEvent.COPIED_SYMLINK, {'name' : srcpath})
 
             return
         else:
