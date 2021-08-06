@@ -220,6 +220,14 @@ def reporter(event_type, event_dict):
             print('\t',key,' ==> ',str(event_dict[key]))
     print()
 
+def get_device_number(path):
+    while path!="/" and not os.path.exists(path):
+        path=os.path.dirname(path)
+
+    pathstat=os.stat(path)
+
+    return pathstat.st_dev
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -236,12 +244,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if os.path.exists(args.tgtdir) and not os.path.isdir(args.tgtdir):
-        print("Target " + args.tgtdir + " is not a directory ... bailing out!")
+        print("ERROR: Target " + args.tgtdir + " is not a directory ... bailing out!", file=sys.stderr)
         exit(2)
 
     if os.path.exists(args.tgtdir) and len(os.listdir(args.tgtdir)) > 0:
-        print("Target directory " + args.tgtdir + " is not empty ... bailing out!")
+        print("ERROR: Target directory " + args.tgtdir + " is not empty ... bailing out!", file=sys.stderr)
         exit(3)
+
+    refdev=get_device_number(args.refdir)
+    tgtdev=get_device_number(args.tgtdir)
+
+    if refdev!=tgtdev:
+        print("ERROR: Reference directory MUST be on same device as target directory", file=sys.stderr)
+        exit(5)
 
     backup=WayBackup(callback=reporter, verbose=args.verbose, dryrun=args.dryrun)
 
