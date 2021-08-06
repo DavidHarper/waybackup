@@ -58,15 +58,15 @@ for SRCDIR in "$@"
 do
     echo "WayBackup RUNNING: ${SRCDIR} ${LATEST_DIR}/${SRCDIR} ${TARGET_DIR}/${SRCDIR}"
 
-    python3 "${WAYBACKUP}" "${SRCDIR}" "${LATEST_DIR}/${SRCDIR}" "${TARGET_DIR}/${SRCDIR}"
+    python3 "${WAYBACKUP}" --srcdir "${SRCDIR}" --refdir "${LATEST_DIR}/${SRCDIR}" --tgtdir "${TARGET_DIR}/${SRCDIR}"
 
     RC=$?
 
     if [ $RC -ne 0 ]
     then
-        /bin/rm -rf "${TARGET_DIR}"
+        /bin/rm -rf "${TARGET_DIR}/${SRCDIR}"
 
-        bailout "An error occurred during the backup procedure"
+        bailout "An error occurred during the backup of ${SRCDIR}"
     fi
 
     echo ''
