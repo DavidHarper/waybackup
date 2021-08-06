@@ -130,7 +130,10 @@ class WayBackup:
         if self.verbose and self.callback is not None:
             self.callback(WayBackupEvent.CREATED_LINK, {'name' : srcpath})
 
-        if srcstat.st_ctime > refstat.st_ctime or srcstat.st_mode != refstat.st_mode or srcstat.st_uid != refstat.st_uid or srcstat.st_gid != refstat.st_gid:
+        if (srcstat.st_ctime > refstat.st_ctime or
+            srcstat.st_mode != refstat.st_mode or
+            srcstat.st_uid != refstat.st_uid or
+            srcstat.st_gid != refstat.st_gid):
             copy_file_attributes(self, srcpath, tgtpath)
             if self.verbose and self.callback is not None:
                 self.callback(WayBackupEvent.COPIED_ATTRIBUTES, {'name' : srcpath})
