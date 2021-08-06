@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os, stat, hashlib
+import argparse
 from datetime import datetime
 from enum import Enum
 
@@ -62,11 +63,11 @@ class WayBackup:
         ignore=self.update_ignore_list(ignore, srcdir)
 
         if (ignore is not None) and (srcdir in ignore):
-            if self.callback is not None:
+            if self.verbose and self.callback is not None:
                 self.callback(WayBackupEvent.SKIPPED_DIRECTORY, {'name' : srcdir})
             return None
 
-        if self.callback is not None:
+        if self.verbose and self.callback is not None:
             self.callback(WayBackupEvent.ENTERED_DIRECTORY, {'name' : srcdir})
 
         if not self.dryrun:
@@ -88,7 +89,7 @@ class WayBackup:
 
         self.directories_processed = self.directories_processed + 1
 
-        if self.callback is not None:
+        if self.verbose and self.callback is not None:
             self.callback(WayBackupEvent.EXITED_DIRECTORY, {'name' : srcdir})
 
     def update_ignore_list(self, ignore, srcdir):
@@ -197,13 +198,27 @@ def reporter(event_type, event_dict):
     print()
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
-        print("Usage: " + sys.argv[0] + " source-directory reference-directory target-directory")
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--verbose", help="increase output verbosity",
+                    action="store_true")
+
+    parser.add_argument("--dryrun", help="perform a trial run with no changes",
+                    action="store_true")
+
+    parser.add_argument("--srcdir", help="source directory root")
+    parser.add_argument("--refdir", help="reference directory root")
+    parser.add_argument("--tgtdir", help="target directory root")
+
+    args = parser.parse_args()
+
+    if args.srcdir is None or args.refdir is None or args.tgtdir is None:
+        print("Usage: " + sys.argv[0] + "[--verbose] [--dryrun] --srcdir source-directory --refdir reference-directory --tgtdir target-directory")
         exit(1)
     else:
-        srcdir = sys.argv[1]
-        refdir = sys.argv[2]
-        tgtdir = sys.argv[3]
+        srcdir = args.srcdir
+        refdir = args.refdir
+        tgtdir = args.tgtdir
 
     if os.path.exists(tgtdir) and not os.path.isdir(tgtdir):
         print("Target " + tgtdir + " is not a directory ... bailing out!")
@@ -213,6 +228,6 @@ if __name__ == '__main__':
         print("Target directory " + tgtdir + " is not empty ... bailing out!")
         exit(3)
 
-    backup=WayBackup(callback=reporter, verbose=True)
+    backup=WayBackup(callback=reporter, verbose=args.verbose, dryrun=args.dryrun)
 
     backup.backup(srcdir, refdir, tgtdir)
