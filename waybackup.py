@@ -130,8 +130,7 @@ class WayBackup:
         if self.verbose and self.callback is not None:
             self.callback(WayBackupEvent.CREATED_LINK, {'name' : srcpath})
 
-        if srcstat.st_ctime > refstat.st_ctime or srcstat.st_mode != refstat.st_mode
-        or srcstat.st_uid != refstat.st_uid or srcstat.st_gid != refstat.st_gid:
+        if srcstat.st_ctime > refstat.st_ctime or srcstat.st_mode != refstat.st_mode or srcstat.st_uid != refstat.st_uid or srcstat.st_gid != refstat.st_gid:
             copy_file_attributes(self, srcpath, tgtpath)
             if self.verbose and self.callback is not None:
                 self.callback(WayBackupEvent.COPIED_ATTRIBUTES, {'name' : srcpath})
@@ -189,7 +188,7 @@ def reporter(event_type, event_dict):
         for key in event_dict:
             print('\t',key,' ==> ',str(event_dict[key]))
     print()
-    
+
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         print("Usage: " + sys.argv[0] + " source-directory reference-directory target-directory")
