@@ -32,19 +32,21 @@ class WayBackup:
         self.symlinks_copied=0
         self.links_created=0
 
-        if self.callback is not None:
-            self.callback(WayBackupEvent.STARTED_BACKUP, None)
+        start_time=datetime.now()
 
-        dtStart=datetime.now()
+        if self.callback is not None:
+            self.callback(WayBackupEvent.STARTED_BACKUP, {'start_time' : start_time})
 
         self.process_directory(srcdir, refdir, tgtdir)
 
-        dtFinish=datetime.now()
+        finish_time=datetime.now()
 
         if self.callback is not None:
             results = {
                 'dryrun' : self.dryrun,
-                'time' : dtFinish-dtStart,
+                'start_time' : start_time,
+                'finish_time' : finish_time,
+                'elapsed_time' : finish_time-start_time,
                 'directories_processed' : self.directories_processed ,
                 'directories_skipped' : self.directories_skipped,
                 'files_copied' : self.files_copied,
