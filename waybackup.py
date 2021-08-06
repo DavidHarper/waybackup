@@ -15,6 +15,8 @@ class WayBackupEvent(Enum):
     CREATED_LINK = 7
     EXITED_DIRECTORY = 8
     FINISHED_BACKUP = 9
+    FOUND_IGNORE_FILE = 10
+    ADDED_IGNORED_DIRECTORY = 11
 
 class WayBackup:
     IGNORE_FILE_NAME='.waybackup.ignore'
@@ -36,7 +38,16 @@ class WayBackup:
         start_time=datetime.now()
 
         if self.callback is not None:
-            self.callback(WayBackupEvent.STARTED_BACKUP, {'start_time' : start_time})
+            self.callback(WayBackupEvent.STARTED_BACKUP,
+                {
+                    'start_time' : start_time,
+                    'dryrun' : self.dryrun,
+                    'verbose' : self.verbose,
+                    'srcdir' : srcdir,
+                    'refdir' : refdir,
+                    'tgtdir' : tgtdir
+                }
+            )
 
         self.process_directory(srcdir, refdir, tgtdir)
 
@@ -44,9 +55,13 @@ class WayBackup:
 
         if self.callback is not None:
             results = {
-                'dryrun' : self.dryrun,
                 'start_time' : start_time,
                 'finish_time' : finish_time,
+                'dryrun' : self.dryrun,
+                'verbose' : self.verbose,
+                'srcdir' : srcdir,
+                'refdir' : refdir,
+                'tgtdir' : tgtdir,
                 'elapsed_time' : finish_time-start_time,
                 'directories_processed' : self.directories_processed ,
                 'directories_skipped' : self.directories_skipped,
@@ -103,12 +118,17 @@ class WayBackup:
 
         ignorelist=[]
 
+        if self.verbose and self.callback is not None:
+            self.callback(WayBackupEvent.FOUND_IGNORE_FILE, {'name' : srcdir})
+
         with open(ignorefile, 'r') as f:
             for line in f:
                 path=line.strip('\n')
                 if not os.path.isabs(path):
                     abspath=os.path.join(srcdir,path)
                     ignorelist.append(abspath)
+                    if self.verbose and self.callback is not None:
+                        self.callback(WayBackupEvent.ADDED_IGNORED_DIRECTORY, {'name' : abspath})
 
         if len(ignorelist)==0:
             return ignore
@@ -209,28 +229,20 @@ if __name__ == '__main__':
     parser.add_argument("--dryrun", help="perform a trial run with no changes",
                     action="store_true")
 
-    parser.add_argument("--srcdir", help="source directory root")
-    parser.add_argument("--refdir", help="reference directory root")
-    parser.add_argument("--tgtdir", help="target directory root")
+    parser.add_argument("--srcdir", required=True, help="source directory root")
+    parser.add_argument("--refdir", required=True, help="reference directory root")
+    parser.add_argument("--tgtdir", required=True, help="target directory root")
 
     args = parser.parse_args()
 
-    if args.srcdir is None or args.refdir is None or args.tgtdir is None:
-        print("Usage: " + sys.argv[0] + " [--verbose] [--dryrun] --srcdir source-directory --refdir reference-directory --tgtdir target-directory")
-        exit(1)
-    else:
-        srcdir = args.srcdir
-        refdir = args.refdir
-        tgtdir = args.tgtdir
-
-    if os.path.exists(tgtdir) and not os.path.isdir(tgtdir):
-        print("Target " + tgtdir + " is not a directory ... bailing out!")
+    if os.path.exists(args.tgtdir) and not os.path.isdir(args.tgtdir):
+        print("Target " + args.tgtdir + " is not a directory ... bailing out!")
         exit(2)
 
-    if os.path.exists(tgtdir) and len(os.listdir(tgtdir)) > 0:
-        print("Target directory " + tgtdir + " is not empty ... bailing out!")
+    if os.path.exists(args.tgtdir) and len(os.listdir(args.tgtdir)) > 0:
+        print("Target directory " + args.tgtdir + " is not empty ... bailing out!")
         exit(3)
 
     backup=WayBackup(callback=reporter, verbose=args.verbose, dryrun=args.dryrun)
 
-    backup.backup(srcdir, refdir, tgtdir)
+    backup.backup(args.srcdir, args.refdir, args.tgtdir)
