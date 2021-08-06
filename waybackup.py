@@ -27,7 +27,7 @@ class WayBackup:
         self.directories_processed=0
         self.directories_skipped=0
         self.files_copied=0
-        self.files_bytes_copied=0
+        self.bytes_copied=0
         self.file_attributes_copied=0
         self.symlinks_copied=0
         self.links_created=0
@@ -37,7 +37,7 @@ class WayBackup:
 
         dtStart=datetime.now()
 
-        process_directory(self, srcdir, refdir, tgtdir)
+        self.process_directory(srcdir, refdir, tgtdir)
 
         dtFinish=datetime.now()
 
@@ -57,7 +57,7 @@ class WayBackup:
             self.callback(WayBackupEvent.FINISHED_BACKUP, results)
 
     def process_directory(self, srcdir, refdir, tgtdir, ignore=None):
-        ignore=update_ignore_list(self, ignore, srcdir)
+        ignore=self.update_ignore_list(ignore, srcdir)
 
         if (ignore is not None) and (srcdir in ignore):
             if self.callback is not None:
@@ -76,19 +76,19 @@ class WayBackup:
             tgtpath = os.path.join(tgtdir, file)
 
             if os.path.islink(srcpath) or os.path.isfile(srcpath):
-                process_file(self, srcpath, refpath, tgtpath)
+                self.process_file(srcpath, refpath, tgtpath)
             elif os.path.isdir(srcpath):
-                process_directory(self, srcpath, refpath, tgtpath, ignore)
+                self.process_directory(srcpath, refpath, tgtpath, ignore)
             else:
-                process_other_entity(self, srcpath, refpath, tgtpath)
+                self.process_other_entity(srcpath, refpath, tgtpath)
 
-        copy_file_attributes(self, srcdir, tgtdir)
+        self.copy_file_attributes(srcdir, tgtdir)
 
         if self.callback is not None:
             self.callback(WayBackupEvent.EXITED_DIRECTORY, {'name' : srcdir})
 
     def update_ignore_list(self, ignore, srcdir):
-        ignorefile=os.path.join(srcdir, IGNORE_FILE_NAME)
+        ignorefile=os.path.join(srcdir, self.IGNORE_FILE_NAME)
 
         if not os.path.isfile(ignorefile):
             return ignore
@@ -119,7 +119,7 @@ class WayBackup:
         refstat = os.stat(refpath)
 
         if srcstat.st_mtime > refstat.st_mtime or srcstat.st_size != refstat.st_size:
-            copy_file(self, srcpath, tgtpath)
+            self.copy_file(srcpath, tgtpath)
             return
 
         if not self.dryrun:
@@ -134,7 +134,7 @@ class WayBackup:
             srcstat.st_mode != refstat.st_mode or
             srcstat.st_uid != refstat.st_uid or
             srcstat.st_gid != refstat.st_gid):
-            copy_file_attributes(self, srcpath, tgtpath)
+            self.copy_file_attributes(srcpath, tgtpath)
             if self.verbose and self.callback is not None:
                 self.callback(WayBackupEvent.COPIED_ATTRIBUTES, {'name' : srcpath})
 
@@ -159,7 +159,7 @@ class WayBackup:
         if os.path.isfile(tgtpath):
             self.file_attributes_copied = self.file_attributes_copied + 1
 
-    def copy_file(srcpath, tgtpath, chunksize = 8192):
+    def copy_file(self, srcpath, tgtpath, chunksize = 8192):
         if os.path.islink(srcpath):
             if not self.dryrun:
                 os.symlink(os.readlink(srcpath), tgtpath)
@@ -176,10 +176,10 @@ class WayBackup:
                     while chunk := fsrc.read(chunksize):
                         ftgt.write(chunk)
 
-            copy_file_attributes(self, srcpath, tgtpath)
+            self.copy_file_attributes(srcpath, tgtpath)
 
             srcstat = os.stat(srcpath)
-            self.files_bytes_copied = self.files_bytes_copied + srcstat.st_size
+            self.bytes_copied = self.bytes_copied + srcstat.st_size
             self.files_copied = self.files_copied + 1
 
             if self.verbose and self.callback is not None:
