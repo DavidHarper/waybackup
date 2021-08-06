@@ -63,8 +63,11 @@ class WayBackup:
         ignore=self.update_ignore_list(ignore, srcdir)
 
         if (ignore is not None) and (srcdir in ignore):
+            self.directories_skipped=self.directories_skipped+1
+
             if self.verbose and self.callback is not None:
                 self.callback(WayBackupEvent.SKIPPED_DIRECTORY, {'name' : srcdir})
+
             return None
 
         if self.verbose and self.callback is not None:
