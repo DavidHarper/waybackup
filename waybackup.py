@@ -77,10 +77,12 @@ class WayBackup:
                 'bytes_copied' : self.bytes_copied,
                 'file_attributes_copied' : self.file_attributes_copied,
                 'symlinks_copied' : self.symlinks_copied,
-                'links_created' : self.links_created
+                'links_created' : self.links_created,
+                'status' : 0
             }
 
             if self.errno!=0:
+                results['status']=self.errno
                 results['errno']=self.errno
                 results['strerror']=self.strerror
                 results['last_directory_entered']=self.last_directory_entered
