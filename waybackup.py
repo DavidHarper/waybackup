@@ -18,6 +18,7 @@ class WayBackupEvent(Enum):
     FOUND_IGNORE_FILE = 10
     ADDED_IGNORED_DIRECTORY = 11
     ABORTED_BACKUP = 12
+    SKIPPED_FILE = 13
 
 class WayBackup:
     IGNORE_FILE_NAME='.waybackup.ignore'
@@ -30,6 +31,7 @@ class WayBackup:
     def backup(self, srcdir, refdir, tgtdir):
         self.directories_processed=0
         self.directories_skipped=0
+        self.files_skipped=0
         self.files_copied=0
         self.bytes_copied=0
         self.file_attributes_copied=0
@@ -73,6 +75,7 @@ class WayBackup:
                 'elapsed_time' : finish_time-start_time,
                 'directories_processed' : self.directories_processed ,
                 'directories_skipped' : self.directories_skipped,
+                'files_skipped' : self.files_skipped,
                 'files_copied' : self.files_copied,
                 'bytes_copied' : self.bytes_copied,
                 'file_attributes_copied' : self.file_attributes_copied,
@@ -116,7 +119,7 @@ class WayBackup:
             tgtpath = os.path.join(tgtdir, file)
 
             if os.path.islink(srcpath) or os.path.isfile(srcpath):
-                self.process_file(srcpath, refpath, tgtpath)
+                self.process_file(srcpath, refpath, tgtpath, ignore)
             elif os.path.isdir(srcpath):
                 self.process_directory(srcpath, refpath, tgtpath, ignore)
             else:
@@ -157,7 +160,15 @@ class WayBackup:
         else:
             return ignore | set(ignorelist)
 
-    def process_file(self, srcpath, refpath, tgtpath):
+    def process_file(self, srcpath, refpath, tgtpath, ignore=None):
+        if (ignore is not None) and (srcpath in ignore):
+            self.files_skipped=self.files_skipped+1
+
+            if self.verbose and self.callback is not None:
+                self.callback(WayBackupEvent.SKIPPED_FILE, {'name' : srcpath})
+
+            return
+
         if not os.path.exists(refpath) or not os.path.isfile(refpath):
             self.copy_file(srcpath, tgtpath)
             return
