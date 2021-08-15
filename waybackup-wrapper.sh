@@ -19,7 +19,12 @@ shift
 
 SCRIPT_HOME=`dirname $0`
 
-WAYBACKUP="${SCRIPT_HOME}/waybackup.py"
+if [ -z "${WAYBACKUP_HOST}" ]
+then
+    WAYBACKUP="${SCRIPT_HOME}/waybackup.py"
+else
+    WAYBACKUP="${SCRIPT_HOME}/waybackup-db.py"
+fi
 
 if [ ! -f "${WAYBACKUP}" ]
 then
