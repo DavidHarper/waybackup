@@ -31,6 +31,11 @@ file in the *reference* directory, then *waybackup* will copy the version in the
 *source* directory to the *target* directory; otherwise, it will create a hard link
 from the version in the *reference* directory.
 
+Note that **waybackup** requires the *reference* directory and the *target*
+directory to be on the **same filesystem** because its incremental backup strategy
+depends upon making **hard** links from the *reference* directory to the *target*
+directory.
+
 **waybackup** will also adjust the ownership and permissions of each file and directory
 that it copies or links to the *target* directory to match those in the *source* directory.
 
