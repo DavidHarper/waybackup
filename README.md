@@ -140,6 +140,15 @@ mv /mnt/backup/today /mnt/backup/yesterday
 waybackup.py --srcdir /home --refdir /mnt/backup/yesterday --tgtdir /mnt/backup/today
 ```
 
+### Backuping up multiple source directories
+
+Refer to the Bash script **waybackup-wrapper.sh** for an example of backing up
+multiple source directories to timestamped target directories.
+
+## Why is it called waybackup?
+
+The name is a tribute both to the Internet Wayback Machine and to Mr Peabody's WABAC machine.
+
 ## License
 
 This software is distributed under the GNU General Public License version 3. Please
