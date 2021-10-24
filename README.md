@@ -47,10 +47,10 @@ failing to change the ownership or permissions during the backup process.
 ## Supported filesystems
 
 **waybackup** requires both the source and reference/target filesystems to support
-user and group ownership, user/group/other permissions and the ability to create
-hard links. Commonly-used Linux filesystem types such as ext3, ext4 and XFS meet these
-requirements. Most Windows filesystems do not. If you plan to use an external USB-connected
-hard disk as a reference/target device, you must re-format it as a supported filesystem.
+user and group ownership, user/group/other permissions and hard links. Commonly-used Linux
+filesystem types such as ext3, ext4 and XFS meet these requirements. Most Windows filesystems
+do not. If you plan to use an external USB-connected hard disk as a reference/target device,
+you must re-format it as a supported filesystem.
 
 ## Optional arguments
 
