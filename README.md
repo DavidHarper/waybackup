@@ -41,8 +41,8 @@ that it copies or links to the *target* directory to match those in the *source*
 
 You are advised to run **waybackup** as **root** when backing up files and directories
 belonging to multiple users and groups. It will exit immediately upon encountering a
-file or directory that it cannot open, or upon failing to change the ownership or
-permissions during the backup process.
+file or directory that it cannot open, or upon failing to create a hard link, or upon
+failing to change the ownership or permissions during the backup process.
 
 ## Optional arguments
 
