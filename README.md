@@ -115,6 +115,31 @@ For convenience, a wrapper Bash script named **waybackup-wrapper.sh** can be use
 automatically select the correct Python script to use, depending on whether the required
 environment variables are set.
 
+## Examples
+
+These examples assume that you are backing up the **/home** directory to an external
+hard disk which is mounted as **/mnt/backup**.
+
+### Creating a base (level zero) backup
+
+```
+mkdir /mnt/backup/empty
+waybackup.py --srcdir /home --refdir /mnt/backup/empty --tgtdir /mnt/backup/levelzero
+```
+
+### Creating the first incremental backup
+
+```
+waybackup.py --srcdir /home --refdir /mnt/backup/levelzero --tgtdir /mnt/backup/today
+```
+
+### Creating the second incremental backup
+
+```
+mv /mnt/backup/today /mnt/backup/yesterday
+waybackup.py --srcdir /home --refdir /mnt/backup/yesterday --tgtdir /mnt/backup/today
+```
+
 ## License
 
 This software is distributed under the GNU General Public License version 3. Please
