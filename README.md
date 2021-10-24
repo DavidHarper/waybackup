@@ -61,7 +61,21 @@ directory contains a **.waybackup.ignore** file with the single line
 
 `tmp`
 
-then **waybackup** will skip the directory *projects/python3/tmp*
+then **waybackup** will skip the directory *projects/python3/tmp* and all sub-directories
+of that directory.
+
+You can specify ignore lists at *any* point in the directory structure, so to tell
+**waybackup** to ignore *projects/python3/tmp*, you have three options. One has already
+been described. Equivalently, you could put the line
+
+`python3/tmp`
+
+in the **.waybackup.ignore** file in the *projects* directory, or the line
+
+`projects/python3/tmp`
+
+in the **.waybackup.ignore** file in the top-level *source* directory specified by the
+**--srcdir** argument.
 
 ## Using a MySQL database to record waybackup runs
 
