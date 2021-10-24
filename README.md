@@ -77,6 +77,9 @@ in the **.waybackup.ignore** file in the *projects* directory, or the line
 in the **.waybackup.ignore** file in the top-level *source* directory specified by the
 **--srcdir** argument.
 
+Note that wildcards are not allowed in any **.waybackup.ignore** file. Directory names must
+match exactly.
+
 ## Using a MySQL database to record waybackup runs
 
 The script **waybackup-db.py** extends the basic operation of **waybackup.py** by
