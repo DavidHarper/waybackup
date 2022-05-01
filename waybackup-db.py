@@ -52,6 +52,7 @@ class WayBackupDatabaseRecorder:
             where(self.backup_history_table.c.id==self.backup_id).
             values(finished=event_dict['finish_time'],
                    directories_processed=event_dict['directories_processed'],
+                   directories_skipped=event_dict['directories_skipped'],
                    files_copied=event_dict['files_copied'],
                    bytes_copied=event_dict['bytes_copied'],
                    symlinks_copied=event_dict['symlinks_copied'],
