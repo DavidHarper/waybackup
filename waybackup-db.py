@@ -2,7 +2,7 @@
 
 from waybackup import WayBackup, WayBackupEvent
 from sqlalchemy import create_engine,Table,MetaData,insert,update
-import os
+import sys, os
 import argparse
 
 class WayBackupDatabaseRecorder:
@@ -111,5 +111,8 @@ if __name__ == '__main__':
     backup=WayBackup(callback=reporter, verbose=args.verbose, dryrun=args.dryrun)
 
     rc=backup.backup(args.srcdir, args.refdir, args.tgtdir)
+
+    if rc != 0:
+        print("ERROR: backup failed with status " + str(rc) + ", message=" + backup.get_strerror(), file=sys.stderr)
 
     exit(rc)

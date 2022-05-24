@@ -27,6 +27,14 @@ class WayBackup:
         self.dryrun=dryrun
         self.verbose=verbose
         self.callback=callback
+        self.errno=0
+        self.strerror=None
+
+    def get_errno(self):
+        return self.errno
+
+    def get_strerror(self):
+        return self.strerror
 
     def backup(self, srcdir, refdir, tgtdir):
         self.directories_processed=0
@@ -291,5 +299,8 @@ if __name__ == '__main__':
     backup=WayBackup(callback=reporter, verbose=args.verbose, dryrun=args.dryrun)
 
     rc=backup.backup(args.srcdir, args.refdir, args.tgtdir)
+
+    if rc != 0:
+        print("ERROR: backup failed with status " + str(rc) + ", message=" + backup.get_strerror(), file=sys.stderr)
 
     exit(rc)
