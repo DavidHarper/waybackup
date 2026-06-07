@@ -4,6 +4,7 @@ import sys, os, stat, hashlib
 import argparse
 from datetime import datetime
 from enum import Enum
+import traceback
 
 class WayBackupEvent(Enum):
     STARTED_BACKUP = 1
@@ -68,6 +69,7 @@ class WayBackup:
         except OSError as error:
             self.errno=error.errno
             self.strerror=error.strerror
+            print(traceback.format_exc())
 
         finish_time=datetime.now()
 
