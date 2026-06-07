@@ -191,7 +191,7 @@ class WayBackup:
             return
 
         if not self.dryrun:
-            os.link(refpath, tgtpath)
+            os.link(refpath, tgtpath, follow_symlinks=False)
 
         self.links_created = self.links_created + 1
 
